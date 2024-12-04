@@ -1,0 +1,12 @@
+{% for item in items %}
+<div class="col-md-4 mb-3 item-card priority-{{ 'high' if item[1] > 5 else 'low' }}">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ item[2] }}</h5>
+            <p class="card-text">{{ item[3] }}</p>
+            <p class="card-text"><small class="text-muted">{{ item[7] }}</small></p>
+            <span class="status-indicator status-{{ 'lost' if item[4] == 'lost' else 'found' }}"></span>
+        </div>
+    </div>
+</div>
+{% endfor %}

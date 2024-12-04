@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost & Found - Login</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom right, #00b4d8, #0077b6); /* Light blue gradient */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            width: 380px;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .container h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: #00b4d8; /* Light blue for the header */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .container p {
+            font-size: 1rem;
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        .container input {
+            width: 100%;
+            padding: 14px;
+            margin: 12px 0;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        .container input:focus {
+            border-color: #00b4d8; /* Blue border on focus */
+            outline: none;
+        }
+
+        .container button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #00b4d8, #0077b6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s ease, background 0.3s ease;
+        }
+
+        .container button:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(to left, #00b4d8, #0077b6);
+        }
+
+        .container a {
+            display: block;
+            margin-top: 20px;
+            color: #00b4d8;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .container a:hover {
+            text-decoration: underline;
+        }
+
+        .top-banner {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(to right, #00b4d8, #0077b6);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 0.8rem;
+            color: #000000;
+        }
+
+        .continue-login {
+            font-size: 0.9rem;
+            color: #00b4d8;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+
+        .continue-login:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-banner">Lost & Found</div>
+        <h1>Login</h1>
+        <p>Welcome back! Please log in to access your account.</p>
+        <form action="/login" method="POST">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <a href="/create">Don't have an account? Sign up!</a>
+        <a href="{{ url_for('continue_without_login') }}" class="continue-login">Continue without Login</a>
+    </div>
+    <div class="footer">By Nandan Reddy S</div> <!-- Your name placed at the bottom left -->
+</body>
+</html>
