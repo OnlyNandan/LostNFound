@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modify Item</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2>Modify Item</h2>
+
+    <!-- Display Flash Message -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-success">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Modify Item Form -->
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="name">Item Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ item['name'] }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="4" required>{{ item['description'] }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="priority">Priority</label>
+            <input type="number" class="form-control" id="priority" name="priority" value="{{ item['priority'] }}" min="0">
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category</label>
+            <input type="text" class="form-control" id="category" name="category" value="{{ item['category'] }}">
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select class="form-control" id="status" name="status">
+                <option value="lost" {% if item['status'] == 'lost' %}selected{% endif %}>Lost</option>
+                <option value="found" {% if item['status'] == 'found' %}selected{% endif %}>Found</option>
+                <option value="returned" {% if item['status'] == 'returned' %}selected{% endif %}>Returned</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" class="form-control" id="location" name="location" value="{{ item['location'] }}">
+        </div>
+
+        <div class="form-group">
+            <label for="contact_info">Contact Info</label>
+            <input type="text" class="form-control" id="contact_info" name="contact_info" value="{{ item['contact_info'] }}">
+        </div>
+
+        <div class="form-group">
+            <label for="image_path">Upload Image</label>
+            <input type="file" class="form-control" id="image_path" name="image_path">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Item</button>
+    </form>
+
+    <br>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+</body>
+</html>

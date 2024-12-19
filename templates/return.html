@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Lost or Found Item</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(120deg, #74ebd5, #9face6);
+            font-family: 'Arial', sans-serif;
+            color: #343a40;
+            padding: 20px;
+        }
+
+        .container {
+            margin-top: 40px;
+        }
+
+        .form-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-title {
+            font-weight: bold;
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+        }
+
+        .form-control, .form-select, .btn {
+            border-radius: 20px;
+        }
+
+        .btn-primary {
+            background: #0056b3;
+            border: none;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #003d80;
+            transform: scale(1.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .file-upload {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            background-color: #f9fafc;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .file-upload:hover {
+            background-color: #e9ecef;
+            border-color: #0056b3;
+        }
+
+        .tooltip-inner {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        .custom-tooltip {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .date-group input[type="text"] {
+            cursor: not-allowed;
+            background-color: #f9f9f9;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="form-container">
+                    <h2 class="form-title">Report Lost or Found Item</h2>
+                    <form action="/report" method="POST" enctype="multipart/form-data">
+                        <!-- Priority -->
+                        <div class="form-group">
+                            <label for="priority">Priority 
+                                <i class="fas fa-info-circle custom-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="Set urgency level for the report"></i>
+                            </label>
+                            <select id="priority" name="priority" class="form-select" required>
+                                <option value="1">Low</option>
+                                <option value="2">Medium</option>
+                                <option value="3">High</option>
+                            </select>
+                        </div>
+
+                        <!-- Item Name -->
+                        <div class="form-group">
+                            <label for="name">Name of the Item</label>
+                            <input type="text" id="name" name="name" class="form-control" placeholder="Enter item name" required>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" name="description" class="form-control" rows="4" placeholder="Provide a brief description" required></textarea>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" name="category" class="form-select" required>
+                                <option value="electronics">Electronics</option>
+                                <option value="clothing">Clothing</option>
+                                <option value="accessories">Accessories</option>
+                                <option value="documents">Documents</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="form-group">
+                            <label>Status</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" id="lost" name="status" value="lost" class="form-check-input" checked>
+                                    <label for="lost" class="form-check-label">Lost</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" id="found" name="status" value="found" class="form-check-input">
+                                    <label for="found" class="form-check-label">Found</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div class="form-group">
+                            <label for="image">Upload an Image</label>
+                            <div class="file-upload">
+                                <input type="file" id="image" name="image" accept="image/*" class="form-control-file" required>
+                                <p class="text-muted">Click or drag file to this area to upload</p>
+                            </div>
+                        </div>
+
+                        
+                        <!-- Date/Time -->
+                        <div class="form-group">
+                            <label for="date">Date/Time</label>
+                            <input type="datetime-local" id="date" name="date" class="form-control date-input" required>
+                        </div>
+
+
+                        <!-- Location -->
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location" name="location" class="form-control" placeholder="Enter the location" required>
+                        </div>
+
+                        <!-- Contact Info -->
+                        <div class="form-group">
+                            <label for="contact_info">Contact Info</label>
+                            <input type="text" id="contact_info" name="contact_info" class="form-control" placeholder="Enter your contact info (email/phone)" required>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            &copy; 2024 Lost & Found. Made By OnlyNandan.
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script>
+        // Initialize Bootstrap Tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Format datetime-local input to dd/mm/yyyy
+        const dateInput = document.getElementById("date-input");
+        const dateDisplay = document.getElementById("date-display");
+        
+        dateInput.addEventListener("change", function () {
+            const date = new Date(this.value);
+            const formattedDate = `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+            dateDisplay.value = formattedDate;
+        });
+    </script>
+</body>
+</html>

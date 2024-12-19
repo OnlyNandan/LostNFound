@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .list-group-item {
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            background-color: #ffffff;
+        }
+        .btn-danger, .btn-warning {
+            border-radius: 5px;
+        }
+        .container {
+            max-width: 900px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .navbar {
+            margin-bottom: 20px;
+        }
+        .list-group-item h5 {
+            font-size: 1.2rem;
+        }
+        .list-group-item p {
+            font-size: 1rem;
+            color: #555;
+        }
+        .btn {
+            min-width: 90px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar with "Back to Dashboard" button -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Admin Dashboard</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>Items Management</h1>
+
+        <!-- Check if there are any items -->
+        {% if items %}
+            <div class="list-group">
+                <!-- Loop through all the items and display them -->
+                {% for item in items %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">{{ item[2] }}</h5>
+                            <p class="mb-1">{{ item[3] }}</p>
+                        </div>
+
+                        <!-- Modify Button -->
+                        <a href="{{ url_for('modify_item', item_id=item[0]) }}" class="btn btn-warning btn-sm ml-2">Modify</a>
+
+                        <!-- Delete Button -->
+                        <form action="{{ url_for('delete_item', item_id=item[0]) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm ml-2">Delete</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No items available.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

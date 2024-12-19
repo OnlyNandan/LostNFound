@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Tab</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #1a1a1a, #333);
+            color: #f5f5f5;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .profile-container {
+            background: #2a2a2a;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 350px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+
+        .profile-container img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            border: 2px solid #4caf50;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .profile-role {
+            font-size: 1rem;
+            color: #a6a6a6;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            font-size: 1rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out;
+            text-transform: uppercase;
+            margin-top: 1rem;
+        }
+
+        .btn-logout {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        .btn-logout:hover {
+            background: #ff6666;
+        }
+
+        .btn-dashboard {
+            background: #4caf50;
+            color: #fff;
+        }
+
+        .btn-dashboard:hover {
+            background: #5edc6e;
+        }
+
+        .icon {
+            color: #4caf50;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <!-- User profile image -->
+        <img src="https://via.placeholder.com/100" alt="Profile Picture">
+        
+        <!-- Display dynamic username -->
+        <p class="profile-name">
+            <i class="fas fa-user icon"></i>
+            {{ user.username }}
+        </p>
+
+        <!-- Display dynamic role -->
+        <p class="profile-role">
+            <i class="fas fa-briefcase icon"></i>
+            {{ user.role }}
+        </p>
+        
+        <!-- Back to dashboard button -->
+        <button class="btn btn-dashboard" onclick="goToDashboard()">Back to Dashboard</button>
+        
+        <!-- Logout button -->
+        <button class="btn btn-logout" onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        function logout() {
+            // Redirect or handle logout logic here
+            window.location.href = "/logout";
+        }
+
+        function goToDashboard() {
+            // Redirect to dashboard page
+            window.location.href = "/dashboard";
+        }
+    </script>
+</body>
+</html>

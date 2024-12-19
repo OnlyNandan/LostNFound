@@ -7,17 +7,16 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* General Styling */
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
+            background-color: #f9fafc;
+            color: #343a40;
         }
 
-        /* Navbar */
         .navbar {
-            background: linear-gradient(90deg, #007bff, #6610f2);
+            background: linear-gradient(90deg, #004080, #6c63ff);
             color: white;
+            padding: 10px;
         }
 
         .navbar-brand {
@@ -25,39 +24,31 @@
             color: white !important;
         }
 
-        .btn-outline-secondary {
-            color: white;
-            border-color: white;
-        }
-
-        .btn-outline-secondary:hover {
-            background-color: white;
-            color: #007bff;
-        }
-
-        /* Layout */
         #main-content {
             display: flex;
+            flex-wrap: wrap;
             gap: 20px;
-            margin-top: 40px;
+            margin-top: 30px;
+            padding: 20px;
         }
 
         #sidebar {
-            flex: 0.6;
+            flex: 1 1 300px;
             background: #ffffff;
             padding: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
+            margin-top: 20px;
         }
 
         #sidebar h4 {
-            color: #6610f2;
+            color: #004080;
             font-weight: bold;
         }
 
         #sidebar a {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             padding: 10px;
             font-size: 16px;
             border-radius: 30px;
@@ -67,48 +58,26 @@
         }
 
         #sidebar a.btn-primary {
-            background: #007bff;
+            background: #004080;
         }
 
         #sidebar a.btn-success {
             background: #28a745;
         }
 
-        #sidebar a:hover {
-            opacity: 0.9;
-        }
-
-        /* Content Area */
         #content {
-            flex: 3.4;
-            padding: 20px;
+            flex: 3 1 600px;
         }
 
-        /* Search + Filters */
-        #search-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        #search, #status-filter, #priority-filter {
-            border-radius: 30px;
-            padding: 10px 20px;
-            flex: 1;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Items Section */
         .item-card {
             background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
             position: relative;
-            height: 350px; /* Fixed height for all cards */
+            width: 100%;
+            max-width: 350px;
+            overflow: hidden;
         }
 
         .item-card:hover {
@@ -116,136 +85,142 @@
             box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
         }
 
-        .item-card .card-body {
-            padding: 20px;
-            position: relative;
-            height: 180px; /* Fixed height for text content */
-            z-index: 1; /* Make sure text is above image */
-        }
-
-        .item-card h5 {
-            font-weight: bold;
-        }
-
         .item-card img {
             width: 100%;
             height: 200px;
             object-fit: cover;
-            border-bottom: 1px solid #ddd;
-            transition: opacity 0.3s ease;
         }
 
         .item-card img.fallback {
-            background: url('https://via.placeholder.com/200x200.png?text=Not+Found') no-repeat center center;
+            background: url('https://via.placeholder.com/350x200.png?text=Image+Unavailable') no-repeat center center;
             background-size: cover;
         }
 
-        .item-card:hover img {
-            opacity: 0; /* Image fades out */
+        .item-card .card-body {
+            padding: 15px;
+            position: relative;
         }
 
-        .status-indicator {
-            display: inline-block;
-            width: 50px;
-            height: 20px;
-            border-radius: 50px;
-            text-align: center;
-            line-height: 20px;
-            font-size: 12px;
-            margin-left: 10px;
-            color: white;
+        .item-card .card-body h5 {
             font-weight: bold;
+            color: #004080;
         }
 
-        .status-lost {
-            background-color: red;
-        }
-
-        .status-found {
-            background-color: green;
-        }
-
-        .priority-high {
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-        
-        }
-
-        .status-indicator:hover {
-            opacity: 0.8;
-        }
-
-        .item-details {
-            display: none;
-            padding-top: 10px;
+        .badge {
             font-size: 14px;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 30px;
+            text-align: center;
         }
 
-        .item-card:hover .item-details {
-            display: block;
+        .bg-danger {
+            background-color: #dc3545;
+            color: white;
         }
 
-        .item-info {
-            font-size: 14px;
-            color: #6c757d;
+        .bg-success {
+            background-color: #28a745;
+            color: white;
         }
 
-        .item-info .location, .item-info .time, .item-info .contact {
-            margin-bottom: 10px;
+        .filters-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filters-container select,
+        .filters-container input {
+            border-radius: 30px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            color: #ffffff;
+            background: #343a40;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 43px; 
+            z-index: 1000;
+            margin: 0;
         }
 
         .no-items {
             text-align: center;
             font-size: 1.2em;
             color: #6c757d;
-        }
-
-        /* Prevent Card Overlap */
-        .item-card {
-            display: inline-block;
-            width: calc(33.3333% - 20px);
-            box-sizing: border-box;
-            margin-bottom: 20px;
-        }
-
-        /* Footer */
-        footer {
-            background: #343a40;
-            color: #adb5bd;
-            text-align: center;
-            padding: 10px 0;
             margin-top: 20px;
+        }
+
+        .recent-item {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .recent-item strong {
+            display: block;
+        }
+
+        .p-3 {
+            border: 1px solid #ddd;
         }
     </style>
 </head>
 <body>
-    <!-- Top Bar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Lost & Found</a>
             <div>
                 {% if current_user.id == 'temp' %}
-                <a href="{{ url_for('login') }}" class="btn btn-outline-secondary">Login</a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light">Login</a>
                 {% else %}
-                <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">Profile</a>
+                <a href="{{ url_for('profile') }}" class="btn btn-outline-light">Profile</a>
                 {% endif %}
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div id="main-content" class="container-fluid">
-        <!-- Left Sidebar for Reporting -->
         <div id="sidebar">
-            <h4>Report Item</h4>
-            <a href="{{ url_for('report_lost') }}" class="btn btn-primary mb-3">Report Lost Item</a>
-            <a href="{{ url_for('report_found') }}" class="btn btn-success mb-3">Report Found Item</a>
+            <h4>Quick Actions</h4>
+            <a href="{{ url_for('report') }}" class="btn btn-primary">Report Lost Item</a>
+            <a href="{{ url_for('report') }}" class="btn btn-success">Report Found Item</a>
+            {% if admin_status %}
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-warning">Admin Dashboard</a>
+            {% endif %}
+            <hr>
+            <h4>Statistics</h4>
+            <div class="p-3 bg-light rounded">
+                <p><strong>Total Items:</strong> {{ total_items or 0 }}</p>
+                <p><strong>Lost Items:</strong> {{ total_lost or 0 }}</p>
+                <p><strong>Found Items:</strong> {{ total_found or 0 }}</p>
+            </div>
+            <hr>
+            <h4>Recently Reported</h4>
+            {% if recent_items %}
+            {% for item in recent_items %}
+            <div class="recent-item">
+                <strong>{{ item[1] }}</strong>
+                {{ 'Lost' if item[4] == 'lost' else 'Found' }} - {{ item[9] }}
+            </div>
+            {% endfor %}
+            {% else %}
+            <p>No recent items found.</p>
+            {% endif %}
         </div>
 
-        <!-- Right Content Area -->
         <div id="content">
-            <!-- Search + Filters -->
-            <div id="search-container">
-                <input type="text" id="search" class="form-control" placeholder="Search for items...">
+            <div class="filters-container">
+                <input type="text" id="search" class="form-control" placeholder="Search items...">
                 <select id="status-filter" class="form-select">
                     <option value="all">All Statuses</option>
                     <option value="lost">Lost</option>
@@ -253,83 +228,65 @@
                 </select>
                 <select id="priority-filter" class="form-select">
                     <option value="all">All Priorities</option>
-                    <option value="high">High Priority</option>
-                    <option value="med">Medium Priority</option>
-                    <option value="low">Low Priority</option>
+                    <option value="3">High</option>
+                    <option value="2">Medium</option>
+                    <option value="1">Low</option>
                 </select>
             </div>
 
-            <!-- Items Grid -->
-            <div id="items" class="row">
+            <div id="items" class="d-flex flex-wrap gap-3">
                 {% if items %}
                 {% for item in items %}
-                <div class="col-md-4 item-card priority-{{ 'high' if item[5]|int > 2 and item[4] == 'lost' else 'high' if item[5]|int > 2 and item[4] == 'found' else 'med' if item[5]|int > 1 else 'low' }}" data-status="{{ item[4] }}" data-category="{{ item[3] }}">
-                    <div class="card">
-                        <img src="{{ url_for('static', filename=item[6]) }}" class="{{ 'fallback' if not item[6] }}">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ item[1] }}</h5>
-                            <p class="card-text">{{ item[2] }}</p>
-                            <div class="status-indicator status-{{ item[4] }}">{{ item[4]|capitalize }}</div>
-                            <div class="item-details">
-                                <p class="item-info location"><strong>Location:</strong> {{ item[7] }}</p>
-                                <p class="item-info time"><strong>Posted:</strong> {{ item[8] }}</p>
-                                <p class="item-info contact"><strong>Contact Info:</strong> {{ item[9] }}</p>
-                            </div>
-                        </div>
+                <div class="item-card" data-priority="{{ item[5] }}" data-status="{{ item[4] }}">
+                    <img src="{{ url_for('static', filename=item[6]) }}" class="{{ 'fallback' if not item[6] }}">
+                    <div class="card-body">
+                        <span class="badge {{ 'bg-danger' if item[4] == 'lost' else 'bg-success' }}">
+                            {{ 'Lost' if item[4] == 'lost' else 'Found' }}
+                        </span>
+                        <h5>{{ item[1] }}</h5>
+                        <p>{{ item[2] }}</p>
+                        <div><strong>Location:</strong> {{ item[7] }}</div>
+                        <div><strong>Contact:</strong> {{ item[8] }}</div>
+                        <div><strong>Date:</strong> {{ item[9] }}</div>
                     </div>
                 </div>
                 {% endfor %}
                 {% else %}
-                <p class="no-items">No items found.</p>
+                <p class="no-items">No items found. Try adjusting your filters or <a href="{{ url_for('report') }}">report a lost item</a>.</p>
                 {% endif %}
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
     <footer>
-        <p>&copy; 2024 Lost & Found. All rights reserved.</p>
+        <p>&copy; 2024 Lost & Found. Made By OnlyNandan.</p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('search').addEventListener('input', function() {
-            var query = this.value.toLowerCase();
-            var items = document.querySelectorAll('.item-card');
+        document.getElementById('search').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            const items = document.querySelectorAll('.item-card');
 
-            items.forEach(function(item) {
-                var title = item.querySelector('.card-title').textContent.toLowerCase();
-                if (title.includes(query)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
+            items.forEach(item => {
+                const title = item.querySelector('h5').textContent.toLowerCase();
+                item.style.display = title.includes(query) ? '' : 'none';
             });
         });
 
-        document.getElementById('status-filter').addEventListener('change', function() {
-            var status = this.value;
-            var items = document.querySelectorAll('.item-card');
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', () => {
+                const statusFilter = document.getElementById('status-filter').value;
+                const priorityFilter = document.getElementById('priority-filter').value;
 
-            items.forEach(function(item) {
-                if (status === 'all' || item.getAttribute('data-status') === status) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        });
+                document.querySelectorAll('.item-card').forEach(item => {
+                    const itemStatus = item.getAttribute('data-status').toLowerCase();
+                    const itemPriority = item.getAttribute('data-priority').toLowerCase();
 
-        document.getElementById('priority-filter').addEventListener('change', function() {
-            var priority = this.value;
-            var items = document.querySelectorAll('.item-card');
+                    const matchesStatus = (statusFilter === 'all' || itemStatus === statusFilter);
+                    const matchesPriority = (priorityFilter === 'all' || itemPriority === priorityFilter);
 
-            items.forEach(function(item) {
-                if (priority === 'all' || item.classList.contains('priority-' + priority)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
+                    item.style.display = matchesStatus && matchesPriority ? '' : 'none';
+                });
             });
         });
     </script>
