@@ -12,41 +12,60 @@
     <style>
         body {
             background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
         }
+
         .list-group-item {
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             background-color: #ffffff;
+            padding: 20px;
         }
-        .btn-danger, .btn-warning {
-            border-radius: 5px;
-        }
-        .container {
-            max-width: 900px;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .navbar {
-            margin-bottom: 20px;
-        }
+
         .list-group-item h5 {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #004080;
         }
+
         .list-group-item p {
             font-size: 1rem;
             color: #555;
         }
-        .btn {
-            min-width: 90px;
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .btn-container .btn {
+            min-width: 110px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 900px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #004080;
+        }
+
+        .navbar-brand, .nav-link, .navbar button {
+            color: #ffffff !important;
         }
     </style>
 </head>
 <body>
 
-    <!-- Navbar with "Back to Dashboard" button -->
+    <!-- Navbar with "Back to Dashboard" and "View Items" buttons -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="navbar-brand" href="#">Admin Dashboard</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,6 +75,11 @@
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item active">
                     <a class="nav-link" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <form action="/view_items" class="form-inline my-2 my-lg-0">
+                        <button type="submit" class="btn btn-success btn-sm ml-3 shadow-sm">View Items</button>
+                    </form>
                 </li>
             </ul>
         </div>
@@ -71,24 +95,25 @@
                 {% for item in items %}
                     <div class="list-group-item d-flex justify-content-between align-items-center">
                         <div>
-                            <h5 class="mb-1">{{ item[2] }}</h5>
-                            <p class="mb-1">{{ item[3] }}</p>
+                            <h5>{{ item[2] }}</h5>
+                            <p>{{ item[3] }}</p>
+                            <p><strong>Date:</strong> {{ item[9] }}</p>
+                            <p>Posted By: {{ item[10] }}</p>
                         </div>
 
-                        <!-- Modify Button -->
-                        <a href="{{ url_for('modify_item', item_id=item[0]) }}" class="btn btn-warning btn-sm ml-2">Modify</a>
-
-                        <!-- Delete Button -->
-                        <form action="{{ url_for('delete_item', item_id=item[0]) }}" method="POST" style="display:inline;">
-                            <button type="submit" class="btn btn-danger btn-sm ml-2">Delete</button>
-                        </form>
+                        <!-- Buttons container -->
+                        <div class="btn-container">
+                            <a href="{{ url_for('modify_item', item_id=item[0]) }}" class="btn btn-warning btn-sm">Modify</a>
+                            <form action="{{ url_for('delete_item', item_id=item[0]) }}" method="POST">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-            <p>No items available.</p>
+            <p class="text-center text-muted">No items available.</p>
         {% endif %}
     </div>
-
 </body>
 </html>

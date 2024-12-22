@@ -4,39 +4,32 @@ from datetime import timedelta
 import mysql.connector
 import os
 from werkzeug.utils import secure_filename
-from PIL import Image
+from PIL import Image, ImageOps
 import os
 from werkzeug.utils import secure_filename
 from io import BytesIO
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from flask_wtf.recaptcha import RecaptchaField
 from datetime import datetime, timedelta
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-
-
-
-MAX_IMAGE_SIZE = (800, 600) 
+# Set a maximum image size and quality level for compression
+MAX_IMAGE_SIZE = (800, 600)  # Max dimensions (width, height)
 QUALITY = 85  # Image quality (0-100)
 
 #'LostNFound.mysql.pythonanywhere-services.com', database='LostNFound$default', user='LostNFound', password='secretpassword'
 
 # Database credentials
-sql_host = "localhost"
-sql_user = "root"
+sql_host = "LostNFound.mysql.pythonanywhere-services.com"
+sql_user = "LostNFound"
 sql_password = "secretpassword"
-sql_database = "lost_and_found"
+sql_database = "LostNFound$default"
 
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
-UPLOAD_FOLDER = 'static/images'  # Folder to store uploaded images
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+UPLOAD_FOLDER = '/home/LostNFound/mysite/static/images'  # Folder to store uploaded images
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg','webp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -60,6 +53,7 @@ def create_connection():
         password=sql_password
     )
 
+# Create tables
 def create_tables():
     connection = create_connection()
     cursor = connection.cursor()
@@ -90,6 +84,7 @@ def create_tables():
 
 create_tables()
 
+# Helper functions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -105,7 +100,7 @@ def load_user(user_id):
         return User(user_id)
     return None
 
-
+# Routes
 @app.route('/')
 def index():
     if current_user.is_authenticated:
@@ -145,7 +140,7 @@ def continue_without_login():
     else:
         flash('Temporary user does not exist!')
         return redirect(url_for('login'))
-    
+
 def get_items_from_db():
     connection = create_connection()
     cursor = connection.cursor()
@@ -161,14 +156,14 @@ def get_items_from_db():
 def is_admin(user_id):
     connection = create_connection()
     cursor = connection.cursor(dictionary=True)
-    
+
     query = "SELECT role FROM user WHERE id = %s "
     cursor.execute(query, (user_id,))
     result = cursor.fetchone()
-    
+
     cursor.close()
     connection.close()
-    
+
     if result and result['role'] == 'admin':
         return True
     return False
@@ -181,26 +176,26 @@ def dashboard():
     total_found = 0
     total_items = len(items)
     admin_status = is_admin(current_user.id)
-    
+
     for i, item in enumerate(items):
         try:
-            priority = int(item[5])  
+            priority = int(item[5])
         except ValueError:
             priority = 0
-       
+
         items[i] = list(item)  # Convert tuple to list
-        items[i][5] = priority  
-        
+        items[i][5] = priority
+
 
         if item[4] == 'lost':
             total_lost += 1
         elif item[4] == 'found':
             total_found += 1
-    recent_items = items[:10]      
+    recent_items = items[:10]
 
-    return render_template('dashboard.html', 
-                           user=get_user_info(), 
-                           items=items, 
+    return render_template('dashboard.html',
+                           user=get_user_info(),
+                           items=items,
                            total_items=total_items,
                            total_lost=total_lost,
                            total_found=total_found,
@@ -211,18 +206,47 @@ def dashboard():
 def admin_dashboard():
     connection = create_connection()
     cursor = connection.cursor()
-    
-    cursor.execute("SELECT * FROM items ORDER BY date DESC") 
+
+    # Get all items from the database
+    cursor.execute("SELECT * FROM items order by date desc")
     items = cursor.fetchall()
-    
+
     cursor.close()
     connection.close()
-    
+
     return render_template('admin_dashboard.html', items=items)
 
+@app.route('/view_items')
+def view_items():
+    connection = create_connection()
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT * FROM items ORDER BY date DESC")
+    items = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    items_list = []  # Create a new list to store formatted items
+
+    for item in items:
+        formatted_item = f'item name: *{item[2]}*\n'  # Name
+        formatted_item += f'desc: {item[3]}\n'  # Description
+        formatted_item += f'status: *{item[5]}*\n'  # Status (lost/found)
+        formatted_item += f'location: {item[8]}\n'  # Location
+        formatted_item += f'contact: {item[9]}\n'  # Contact
+        formatted_item += '------'*10 + '\n'  # Separator
+        items_list.append(formatted_item)
+
+    items_list.append("View all at website: https://lostnfound.pythonanywhere.com/login")
+
+    formatted_data = ''.join(items_list)
+
+    return render_template('view_items.html', items=formatted_data)
 @app.route('/modify_item/<int:item_id>', methods=['GET', 'POST'])
 def modify_item(item_id):
     if request.method == 'POST':
+        # Get the data from the form
         name = request.form['name']
         description = request.form['description']
         priority = request.form['priority']
@@ -232,10 +256,11 @@ def modify_item(item_id):
         contact_info = request.form['contact_info']
         image_path = request.files.get('image_path')  # Image upload (optional)
 
+        # Handling image upload (if provided)
         if image_path:
             image_filename = secure_filename(image_path.filename)
-            image_path.save(os.path.join('static/uploads', image_filename))
-            image_path = os.path.join('static/uploads', image_filename)
+            image_path.save(os.path.join('/home/LostNFound/mysite/static/uploads', image_filename))
+            image_path = os.path.join('/home/LostNFound/mysite/static/uploads', image_filename)
         else:
             image_path = None  # Keep previous image path if no new image is uploaded
 
@@ -243,9 +268,9 @@ def modify_item(item_id):
         connection = create_connection()
         cur = connection.cursor()
         cur.execute("""
-            UPDATE items 
-            SET name = %s, description = %s, priority = %s, category = %s, 
-                status = %s, location = %s, contact_info = %s, image_path = %s 
+            UPDATE items
+            SET name = %s, description = %s, priority = %s, category = %s,
+                status = %s, location = %s, contact_info = %s, image_path = %s
             WHERE id = %s
         """, (name, description, priority, category, status, location, contact_info, image_path, item_id))
         mysql.connection.commit()
@@ -273,39 +298,32 @@ def modify_item(item_id):
 def delete_item(item_id):
     connection = create_connection()
     cursor = connection.cursor()
-    
+
     # Get the image path of the item before deleting it
     cursor.execute("SELECT image_path FROM items WHERE id = %s", (item_id,))
     item = cursor.fetchone()
 
     if item:
-        # If the item exists, get the image path (relative path from your 'static' folder)
-        image_path = item[0] 
-        print(f"Image path from DB: {image_path}")
-        
-        image_path = image_path.lstrip('/') 
-        image_path = image_path.split('/')[-1]  # Get the filename only
-        
-        # Construct the full path to the image inside the static folder
-        static_folder = os.path.join(current_app.root_path, 'static', 'images')
-        full_image_path = os.path.join(static_folder, image_path)  # Don't add /images again
-        print(f"Full image path: {full_image_path}")
+        image_path = item[0]  # e.g., /images/filename
+        image_path = "/home/LostNFound/mysite/static"+image_path
+        print(f"Full image path: {image_path}")
 
         # Delete the item from the database
         cursor.execute("DELETE FROM items WHERE id = %s", (item_id,))
         connection.commit()
 
         # If the image exists, delete it
-        if os.path.exists(full_image_path):
-            os.remove(full_image_path)
+        if os.path.exists(image_path):
+            os.remove(image_path)
             print("Image deleted successfully!")
         else:
-            print(f"Image file not found: {full_image_path}")
-    
+            print(f"Image file not found: {image_path}")
+
     cursor.close()
     connection.close()
-    
+
     return redirect(url_for('admin_dashboard'))
+
 
 
 @app.route('/fetch_items', methods=['GET'])
@@ -344,6 +362,15 @@ def fetch_items():
 @app.route('/report', methods=['GET', 'POST'])
 @login_required
 def report():
+    user = current_user.id  # Get the current user's ID
+    connection = create_connection()
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM user WHERE id = %s", (user,))
+    user_data = cursor.fetchone()
+    if user_data and user_data['username'] == 'temp':
+        # User is 'temp', return a custom message
+        return render_template('create.html', temp_user=True)
+
     if request.method == 'POST':
         priority = request.form['priority']
         name = request.form['name']
@@ -357,32 +384,67 @@ def report():
         # Handle file upload
         file = request.files['image']
         image_path = None
+        image_folder = '/home/LostNFound/mysite/static/images/'
+        if not os.path.exists(image_folder):
+            os.makedirs(image_folder)
         if file and allowed_file(file.filename):
             # Compress the image
             filename = secure_filename(file.filename)
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-            image = Image.open(file)
-            image.thumbnail(MAX_IMAGE_SIZE)  # Resize image if larger than MAX_IMAGE_SIZE
+        # Open and compress the image using Pillow
+        img = Image.open(file)
 
-            with BytesIO() as img_io:
-                image.save(img_io, format='JPEG', quality=QUALITY)
-                img_io.seek(0)
-                with open(image_path, 'wb') as f:
-                    f.write(img_io.read())
+        # Target dimensions for 16:9 aspect ratio
+        target_width = 1280
+        target_height = 720
+        target_size = (target_width, target_height)
 
-            ip = "/images/" + filename
+        # Resize the image to fit within the target size while maintaining the aspect ratio
+        img.thumbnail(target_size, Image.LANCZOS)
 
-        query = """
-            INSERT INTO items (priority, name, description, category, status, image_path, date, location, contact_info)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        values = (priority, name, description, category, status, ip, date, location, contact_info)
+        # Create a new image with a black background (16:9 aspect ratio)
+        new_img = Image.new("RGB", target_size, color=(200, 200, 200))
+
+        # Center the resized image on the 16:9 canvas
+        offset_x = (target_width - img.width) // 2
+        offset_y = (target_height - img.height) // 2
+        new_img.paste(img, (offset_x, offset_y))
+
+        # Save the resized image with reduced quality
+        with BytesIO() as img_io:
+            # Save the resized image to a BytesIO object
+            new_img.save(img_io, format='JPEG', quality=QUALITY)  # QUALITY is your compression level
+            img_io.seek(0)
+
+            # Write the BytesIO content to the final file
+            with open(image_path, 'wb') as f:
+                f.write(img_io.read())
+
+        # Return the image path for further use
+        ip = "/images/" + filename
+
+        # Insert data into the database
+        user = current_user.id
         connection = create_connection()
-        cursor = connection.cursor()
 
-        cursor.execute(query, values)
-        connection.commit()
+        # Ensure to use DictCursor to get results as dictionaries
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM user WHERE id = %s", (user,))
+        na = cursor.fetchone()
+
+        if na:
+            # Ensure na['username'] is a valid field before trying to capitalize
+            na['username'] = na['username'].capitalize()
+
+            query = """
+                INSERT INTO items (priority, name, description, category, status, image_path, date, location, contact_info, user)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            values = (priority, name, description, category, status, ip, date, location, contact_info, na['username'])
+
+            cursor.execute(query, values)
+            connection.commit()
 
         return redirect(url_for('dashboard'))  # Redirect to dashboard after submission
 
@@ -392,7 +454,7 @@ def report():
 def create():
     # Check the rate-limit cookie on GET request for the create page
     cookie_limit = request.cookies.get('rate_limit')
-    
+
     if request.method == 'POST':
         # On POST, check for the rate-limit cookie to apply the rate limit
         if cookie_limit:
@@ -443,27 +505,56 @@ def create():
     return render_template('create.html')
 
 
-@app.route('/profile')
+
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     connection = create_connection()
     cursor = connection.cursor(dictionary=True)
-    user=current_user.id
+    user = current_user.id
+
+    # Fetch user data
     cursor.execute("SELECT * FROM user WHERE id = %s", (user,))
     na = cursor.fetchone()
-    na['username']=na['username'].capitalize()
-    na['role']=na['role'].capitalize()
-    print("user_info",na)
+    user=na['username']
+    # Fetch posts created by the user
+    cursor.execute("SELECT * FROM items WHERE user = %s", (user,))
+    posts = cursor.fetchall()
+    if not posts:
+        posts = [1]
+    # Handle post deletion
+    if request.method == 'POST':
+        post_id = request.form.get('post_id')
+        if post_id:
+            # Delete post if it belongs to the current user
+            cursor.execute("SELECT * FROM items WHERE id = %s AND user = %s", (post_id, user))
+            post_to_delete = cursor.fetchone()
+
+            if post_to_delete:
+                # Delete the post from the database
+                cursor.execute("DELETE FROM items WHERE id = %s", (post_id,))
+                connection.commit()
+
+                # Optionally, handle image deletion from the file system
+                if post_to_delete['image_path']:
+                    image_path = os.path.join(app.config['UPLOAD_FOLDER'], post_to_delete['image_path'])
+                    if os.path.exists(image_path):
+                        os.remove(image_path)
+
+                flash('Post deleted successfully', 'success')
+                return redirect(url_for('profile'))
+
     cursor.close()
     connection.close()
-    return render_template('profile.html', user=na)
 
+    return render_template('profile.html', user=na, posts=posts)
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
 
+# Utility functions
 def get_user_info():
     if current_user.is_authenticated:
         connection = create_connection()

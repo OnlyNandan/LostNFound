@@ -15,15 +15,23 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            flex-direction: column;
+            overflow-x: hidden;
         }
 
         .profile-container {
             background: #2a2a2a;
             padding: 2rem;
             border-radius: 15px;
-            width: 350px;
+            width: 400px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
             text-align: center;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .profile-container:hover {
+            transform: scale(1.05);
         }
 
         .profile-container img {
@@ -32,12 +40,14 @@
             border-radius: 50%;
             margin-bottom: 1rem;
             border: 2px solid #4caf50;
+            object-fit: cover;
         }
 
         .profile-name {
             font-size: 1.5rem;
             font-weight: bold;
             margin: 0.5rem 0;
+            text-transform: capitalize;
         }
 
         .profile-role {
@@ -75,17 +85,95 @@
             background: #5edc6e;
         }
 
+        .posts-section {
+            margin-top: 3rem;
+            width: 80%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .posts-section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #4caf50;
+        }
+
+        .post-card {
+            background: #333;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .post-card h4 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #4caf50;
+            text-transform: capitalize;
+        }
+
+        .post-card p {
+            color: #ccc;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .post-card .post-actions {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .post-actions button {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out;
+        }
+
+        .btn-delete {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        .btn-delete:hover {
+            background: #ff6666;
+        }
+
+        .btn-edit {
+            background: #4caf50;
+            color: #fff;
+        }
+
+        .btn-edit:hover {
+            background: #5edc6e;
+        }
+
         .icon {
             color: #4caf50;
             margin-right: 0.5rem;
+        }
+
+        .no-posts-message {
+            text-align: center;
+            color: #ccc;
+            font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
     <div class="profile-container">
         <!-- User profile image -->
-        <img src="https://via.placeholder.com/100" alt="Profile Picture">
-        
+        <img src="{{ user.profile_image or 'https://via.placeholder.com/100' }}" alt="Profile Picture">
+
         <!-- Display dynamic username -->
         <p class="profile-name">
             <i class="fas fa-user icon"></i>
@@ -97,12 +185,34 @@
             <i class="fas fa-briefcase icon"></i>
             {{ user.role }}
         </p>
-        
+
         <!-- Back to dashboard button -->
         <button class="btn btn-dashboard" onclick="goToDashboard()">Back to Dashboard</button>
-        
+
         <!-- Logout button -->
         <button class="btn btn-logout" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Posts Section -->
+    <div class="posts-section">
+        <h2>Your Posts</h2>
+        {% if posts %}
+        {% for post in posts %}
+        <div class="post-card">
+            <h4>{{ post.name }}</h4>
+            <p>{{ post.description }}</p>
+            <div class="post-actions">
+                <a href="{{ post.image_path }}" target="_blank"><button class="btn-edit">View Image</button></a>
+                <form method="POST" action="{{ url_for('profile') }}">
+                    <input type="hidden" name="post_id" value="{{ post.id }}">
+                    <button type="submit" class="btn-delete">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="no-posts-message">You have no posts yet.</p>
+        {% endif %}
     </div>
 
     <script>
