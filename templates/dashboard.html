@@ -184,11 +184,11 @@
                 <a href="{{ url_for('login') }}" class="btn btn-outline-light">Login</a>
                 {% else %}
                 <a href="{{ url_for('profile') }}" class="btn btn-outline-light">Profile</a>
+                <a href="{{ url_for('show_locations') }}" class="btn btn-outline-light ms-2">Show Locations</a>  <!-- New button added here -->
                 {% endif %}
             </div>
         </div>
     </nav>
-
     <div id="main-content" class="container-fluid">
         <div id="sidebar">
             <h4>Quick Actions</h4>

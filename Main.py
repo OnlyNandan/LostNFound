@@ -16,18 +16,16 @@ logging.basicConfig(level=logging.DEBUG)
 MAX_IMAGE_SIZE = (800, 600)  # Max dimensions (width, height)
 QUALITY = 85  # Image quality (0-100)
 
-#'LostNFound.mysql.pythonanywhere-services.com', database='LostNFound$default', user='LostNFound', password='secretpassword'
+#'LostNFound.mysql.pythonanywhere-services.com', database='LostNFound$default', user='LostNFound', password='"*********"'
 
-# Database credentials
-sql_host = "LostNFound.mysql.pythonanywhere-services.com"
+sql_host = "**.***.(ythonanywhere-services.com"
 sql_user = "LostNFound"
-sql_password = "secretpassword"
+sql_password = "*********"
 sql_database = "LostNFound$default"
 
-# Initialize Flask app
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
-UPLOAD_FOLDER = '/home/LostNFound/mysite/static/images'  # Folder to store uploaded images
+UPLOAD_FOLDER = '/home/LostNFound/mysite/static/images'  
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg','webp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -39,12 +37,10 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=7)
 
-# User class
 class User(UserMixin):
     def __init__(self, id):
         self.id = id
 
-# Database connection function
 def create_connection():
     return mysql.connector.connect(
         host=sql_host,
@@ -53,7 +49,6 @@ def create_connection():
         password=sql_password
     )
 
-# Create tables
 def create_tables():
     connection = create_connection()
     cursor = connection.cursor()
@@ -75,6 +70,8 @@ def create_tables():
         image_path VARCHAR(255),
         date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         location VARCHAR(100),
+        latitude FLOAT,
+        longitude FLOAT,
         contact_info VARCHAR(100)
     );""")
     cursor.execute("INSERT IGNORE INTO user (username, password) VALUES ('temp', 'temp');")
@@ -84,7 +81,6 @@ def create_tables():
 
 create_tables()
 
-# Helper functions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -145,6 +141,17 @@ def get_items_from_db():
     connection = create_connection()
     cursor = connection.cursor()
 
+    cursor.execute("SELECT id, name, description, category, status, priority, image_path, location, contact_info, date  FROM items order by date desc")
+    items = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return items
+def get_items_from_db_prior():
+    connection = create_connection()
+    cursor = connection.cursor()
+
     cursor.execute("SELECT id, name, description, category, status, priority, image_path, location, contact_info, date  FROM items order by priority desc")
     items = cursor.fetchall()
 
@@ -172,6 +179,7 @@ def is_admin(user_id):
 @login_required
 def dashboard():
     items = get_items_from_db()
+    items_prior = get_items_from_db_prior()
     total_lost = 0
     total_found = 0
     total_items = len(items)
@@ -183,7 +191,7 @@ def dashboard():
         except ValueError:
             priority = 0
 
-        items[i] = list(item)  # Convert tuple to list
+        items[i] = list(item) 
         items[i][5] = priority
 
 
@@ -191,7 +199,17 @@ def dashboard():
             total_lost += 1
         elif item[4] == 'found':
             total_found += 1
-    recent_items = items[:10]
+    for i, item in enumerate(items_prior):
+        try:
+            priority = int(item[5])
+        except ValueError:
+            priority = 0
+
+        items_prior[i] = list(item)  
+        items_prior[i][5] = priority
+
+
+    recent_items = items_prior[:10]
 
     return render_template('dashboard.html',
                            user=get_user_info(),
@@ -207,7 +225,6 @@ def admin_dashboard():
     connection = create_connection()
     cursor = connection.cursor()
 
-    # Get all items from the database
     cursor.execute("SELECT * FROM items order by date desc")
     items = cursor.fetchall()
 
@@ -227,15 +244,15 @@ def view_items():
     cursor.close()
     connection.close()
 
-    items_list = []  # Create a new list to store formatted items
+    items_list = []  
 
     for item in items:
-        formatted_item = f'item name: *{item[2]}*\n'  # Name
-        formatted_item += f'desc: {item[3]}\n'  # Description
-        formatted_item += f'status: *{item[5]}*\n'  # Status (lost/found)
-        formatted_item += f'location: {item[8]}\n'  # Location
-        formatted_item += f'contact: {item[9]}\n'  # Contact
-        formatted_item += '------'*10 + '\n'  # Separator
+        formatted_item = f'item name: *{item[2]}*\n'  
+        formatted_item += f'desc: {item[3]}\n'  
+        formatted_item += f'status: *{item[5]}*\n'  
+        formatted_item += f'location: {item[8]}\n' 
+        formatted_item += f'contact: {item[9]}\n' 
+        formatted_item += '------'*10 + '\n'  
         items_list.append(formatted_item)
 
     items_list.append("View all at website: https://lostnfound.pythonanywhere.com/login")
@@ -246,7 +263,6 @@ def view_items():
 @app.route('/modify_item/<int:item_id>', methods=['GET', 'POST'])
 def modify_item(item_id):
     if request.method == 'POST':
-        # Get the data from the form
         name = request.form['name']
         description = request.form['description']
         priority = request.form['priority']
@@ -254,17 +270,14 @@ def modify_item(item_id):
         status = request.form['status']
         location = request.form['location']
         contact_info = request.form['contact_info']
-        image_path = request.files.get('image_path')  # Image upload (optional)
-
-        # Handling image upload (if provided)
+        image_path = request.files.get('image_path') 
         if image_path:
             image_filename = secure_filename(image_path.filename)
             image_path.save(os.path.join('/home/LostNFound/mysite/static/uploads', image_filename))
             image_path = os.path.join('/home/LostNFound/mysite/static/uploads', image_filename)
         else:
-            image_path = None  # Keep previous image path if no new image is uploaded
+            image_path = None 
 
-        # Update the database
         connection = create_connection()
         cur = connection.cursor()
         cur.execute("""
@@ -277,9 +290,8 @@ def modify_item(item_id):
         cur.close()
 
         flash("Item updated successfully!", "success")
-        return redirect(url_for('dashboard'))  # Redirect to the dashboard
+        return redirect(url_for('dashboard'))  
 
-    # Retrieve the current item details
     connection = create_connection()
     cur = connection.cursor()
     cur.execute("SELECT * FROM items WHERE id = %s", [item_id])
@@ -299,20 +311,17 @@ def delete_item(item_id):
     connection = create_connection()
     cursor = connection.cursor()
 
-    # Get the image path of the item before deleting it
     cursor.execute("SELECT image_path FROM items WHERE id = %s", (item_id,))
     item = cursor.fetchone()
 
     if item:
-        image_path = item[0]  # e.g., /images/filename
+        image_path = item[0]  
         image_path = "/home/LostNFound/mysite/static"+image_path
         print(f"Full image path: {image_path}")
 
-        # Delete the item from the database
         cursor.execute("DELETE FROM items WHERE id = %s", (item_id,))
         connection.commit()
 
-        # If the image exists, delete it
         if os.path.exists(image_path):
             os.remove(image_path)
             print("Image deleted successfully!")
@@ -362,13 +371,13 @@ def fetch_items():
 @app.route('/report', methods=['GET', 'POST'])
 @login_required
 def report():
-    user = current_user.id  # Get the current user's ID
+    user_id = current_user.id
     connection = create_connection()
     cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM user WHERE id = %s", (user,))
+
+    cursor.execute("SELECT * FROM user WHERE id = %s", (user_id,))
     user_data = cursor.fetchone()
     if user_data and user_data['username'] == 'temp':
-        # User is 'temp', return a custom message
         return render_template('create.html', temp_user=True)
 
     if request.method == 'POST':
@@ -380,102 +389,110 @@ def report():
         date = request.form['date']
         location = request.form['location']
         contact_info = request.form['contact_info']
+        latitude = request.form.get('latitude')  
+        longitude = request.form.get('longitude')  
 
-        # Handle file upload
         file = request.files['image']
-        image_path = None
-        image_folder = '/home/LostNFound/mysite/static/images/'
-        if not os.path.exists(image_folder):
-            os.makedirs(image_folder)
         if file and allowed_file(file.filename):
-            # Compress the image
             filename = secure_filename(file.filename)
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image_folder = '/home/LostNFound/mysite/static/images/'
+            if not os.path.exists(image_folder):
+                os.makedirs(image_folder)
 
-        # Open and compress the image using Pillow
-        img = Image.open(file)
+            image_path = os.path.join(image_folder, filename)
 
-        # Target dimensions for 16:9 aspect ratio
-        target_width = 1280
-        target_height = 720
-        target_size = (target_width, target_height)
+            try:
+                img = Image.open(file)
 
-        # Resize the image to fit within the target size while maintaining the aspect ratio
-        img.thumbnail(target_size, Image.LANCZOS)
+                target_width, target_height = 1280, 720
+                original_width, original_height = img.size
+                original_ratio = original_width / original_height
+                target_ratio = target_width / target_height
 
-        # Create a new image with a black background (16:9 aspect ratio)
-        new_img = Image.new("RGB", target_size, color=(200, 200, 200))
+                if original_ratio > target_ratio:
+                    new_width = target_width
+                    new_height = int(target_width / original_ratio)
+                else:
+                    new_height = target_height
+                    new_width = int(target_height * original_ratio)
 
-        # Center the resized image on the 16:9 canvas
-        offset_x = (target_width - img.width) // 2
-        offset_y = (target_height - img.height) // 2
-        new_img.paste(img, (offset_x, offset_y))
+                img = img.resize((new_width, new_height), Image.LANCZOS)
 
-        # Save the resized image with reduced quality
-        with BytesIO() as img_io:
-            # Save the resized image to a BytesIO object
-            new_img.save(img_io, format='JPEG', quality=QUALITY)  # QUALITY is your compression level
-            img_io.seek(0)
+                from PIL import ImageStat
+                avg_color = tuple(int(c) for c in ImageStat.Stat(img).mean[:3])
+                final_img = Image.new("RGB", (target_width, target_height), avg_color)
+                offset_x = (target_width - new_width) // 2
+                offset_y = (target_height - new_height) // 2
+                final_img.paste(img, (offset_x, offset_y))
 
-            # Write the BytesIO content to the final file
-            with open(image_path, 'wb') as f:
-                f.write(img_io.read())
+                final_img.save(image_path, format='JPEG', quality=85)
 
-        # Return the image path for further use
-        ip = "/images/" + filename
+                image_db_path = "/images/" + filename
+            except Exception as e:
+                print(f"Error processing image: {e}")
+                flash("Image upload failed. Please try again.", "danger")
+                return redirect(url_for('report'))
 
-        # Insert data into the database
-        user = current_user.id
-        connection = create_connection()
+            try:
+                query = """
+                    INSERT INTO items (priority, name, description, category, status, image_path, date, location, contact_info, latitude, longitude, user)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                values = (priority, name, description, category, status, image_db_path, date, location, contact_info, latitude, longitude, user_data['username'].capitalize())
+                cursor.execute(query, values)
+                connection.commit()
 
-        # Ensure to use DictCursor to get results as dictionaries
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM user WHERE id = %s", (user,))
-        na = cursor.fetchone()
+                flash("Report successfully submitted!", "success")
+                return redirect(url_for('dashboard'))
+            except Exception as e:
+                print(f"Error inserting into database: {e}")
+                flash("Failed to submit report. Please try again later.", "danger")
+                return redirect(url_for('report'))
+        else:
+            flash("Invalid file format. Please upload a valid image.", "danger")
+            return redirect(url_for('report'))
 
-        if na:
-            # Ensure na['username'] is a valid field before trying to capitalize
-            na['username'] = na['username'].capitalize()
+    return render_template('return.html')
 
-            query = """
-                INSERT INTO items (priority, name, description, category, status, image_path, date, location, contact_info, user)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            values = (priority, name, description, category, status, ip, date, location, contact_info, na['username'])
+@app.route('/show_locations')
+@login_required
+def show_locations():
+    connection = create_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT name, status, latitude, longitude, contact_info,image_path FROM items")
+    lost_items = cursor.fetchall()
+    cursor.close()
 
-            cursor.execute(query, values)
-            connection.commit()
+    for i in range(len(lost_items)):
+        lost_items[i] = list(lost_items[i])  
+        lost_items[i][2] = float(lost_items[i][2]) 
+        lost_items[i][3] = float(lost_items[i][3])  
+        #image_path = lost_items[i][5]  # e.g., /images/filename
+        #lost_items[i][5] = "/home/LostNFound/mysite/static"+image_path
 
-        return redirect(url_for('dashboard'))  # Redirect to dashboard after submission
 
-    return render_template('return.html')  # Render the HTML form
+    return render_template('show_locations.html', lost_items=lost_items)
 
 @app.route('/create', methods=['GET', 'POST'])
 def create():
-    # Check the rate-limit cookie on GET request for the create page
     cookie_limit = request.cookies.get('rate_limit')
 
     if request.method == 'POST':
-        # On POST, check for the rate-limit cookie to apply the rate limit
         if cookie_limit:
             last_request_time = datetime.strptime(cookie_limit, '%Y-%m-%d %H:%M:%S')
             if datetime.now() - last_request_time < timedelta(seconds=60):
-                # If rate-limited, redirect to login
                 flash('You are being rate-limited. Please wait a minute before trying again.')
                 return redirect(url_for('create'))
 
-        # Extract the form data
         username = request.form['username']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
 
-        # Check if passwords match
         if password != confirm_password:
             flash("Passwords don't match. Please try again.")
             return redirect(url_for('create'))
 
-        # Check if the username or email already exists in the database
-        connection = create_connection()  # Assuming you have a create_connection function defined
+        connection = create_connection() 
         cursor = connection.cursor()
 
         cursor.execute("SELECT * FROM user WHERE username = %s", (username,))
@@ -485,7 +502,6 @@ def create():
             flash("Username or email already exists. Please choose another one.")
             return redirect(url_for('create'))
 
-        # Insert the new user into the database with a default 'user' role
         cursor.execute("INSERT INTO user (username, password, role) VALUES (%s, %s, %s)",
                        (username, password, 'user'))
         connection.commit()
@@ -495,13 +511,11 @@ def create():
 
         flash("Account created successfully! You can now log in.")
 
-        # Set the rate-limit cookie after form submission (POST request)
         response = make_response(redirect(url_for('login')))
         response.set_cookie('rate_limit', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), max_age=timedelta(minutes=1))
-        logging.debug("Setting rate-limit cookie.")  # Log that the cookie is being set
+        logging.debug("Setting rate-limit cookie.") 
         return response
 
-    # For GET request, allow access to the create form
     return render_template('create.html')
 
 
@@ -513,29 +527,23 @@ def profile():
     cursor = connection.cursor(dictionary=True)
     user = current_user.id
 
-    # Fetch user data
     cursor.execute("SELECT * FROM user WHERE id = %s", (user,))
     na = cursor.fetchone()
     user=na['username']
-    # Fetch posts created by the user
     cursor.execute("SELECT * FROM items WHERE user = %s", (user,))
     posts = cursor.fetchall()
     if not posts:
         posts = [1]
-    # Handle post deletion
     if request.method == 'POST':
         post_id = request.form.get('post_id')
         if post_id:
-            # Delete post if it belongs to the current user
             cursor.execute("SELECT * FROM items WHERE id = %s AND user = %s", (post_id, user))
             post_to_delete = cursor.fetchone()
 
             if post_to_delete:
-                # Delete the post from the database
                 cursor.execute("DELETE FROM items WHERE id = %s", (post_id,))
                 connection.commit()
 
-                # Optionally, handle image deletion from the file system
                 if post_to_delete['image_path']:
                     image_path = os.path.join(app.config['UPLOAD_FOLDER'], post_to_delete['image_path'])
                     if os.path.exists(image_path):
@@ -554,7 +562,6 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-# Utility functions
 def get_user_info():
     if current_user.is_authenticated:
         connection = create_connection()

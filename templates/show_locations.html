@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9fafc;
+            color: #343a40;
+            margin: 0;
+        }
+
+        /* Navbar style */
+        .navbar {
+            background: linear-gradient(90deg, #004080, #6c63ff);
+            color: white;
+            padding: 10px;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: white !important;
+        }
+
+        /* Full-screen map */
+        #map { height: 100vh; width: 100%; }
+
+        /* Back button */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 1000;  /* Ensure it stays above the map */
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Popup styles */
+        .popup-img {
+            width: 120%;  /* Increase image size */
+            height: auto;
+            margin-top: 10px;
+            object-fit: contain;
+        }
+
+        .popup-content-wrapper {
+            background-size: cover;
+            background-position: center;
+            padding: 15px;
+            max-width: 250px;
+            background-color: rgba(255, 255, 255, 0.7); /* Light background for text */
+        }
+
+        .popup-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #2d3436;
+        }
+
+        /* Gradient Navbar */
+        .navbar a {
+            color: white !important;
+            font-size: 16px;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+
+        .navbar a:hover {
+            color: #F39C12;
+        }
+
+        .navbar button {
+            background-color: #F39C12;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            padding: 10px 20px;
+        }
+
+        .navbar button:hover {
+            background-color: #E67E22;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="#">Lost & Found</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="dashboard">Back to Dashboard</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="map"></div>
+
+    <script>
+        var map = L.map('map').setView([12.923631, 77.500312], 18);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var markers = L.markerClusterGroup({
+            iconCreateFunction: function(cluster) {
+                var count = cluster.getChildCount();
+                var markerColor = count > 10 ? 'red' : count > 5 ? 'orange' : 'green';
+                return L.divIcon({
+                    html: `<div style="background-color:${markerColor}; width: 30px; height: 30px; border-radius: 50%; border: 2px solid white; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">${count}</div>`,
+                    className: 'marker-cluster',
+                    iconSize: L.point(40, 40)
+                });
+            }
+        });
+
+        console.log({{ lost_items|tojson }});
+
+        {% for item in lost_items %}
+            var markerColor = "";
+            if ("{{ item[1] }}" === "lost") {
+                markerColor = "red";
+            } else if ("{{ item[1] }}" === "found") {
+                markerColor = "green";
+            } else if ("{{ item[1] }}" === "returned") {
+                markerColor = "blue";
+            }
+
+            var icon = L.divIcon({
+                className: 'leaflet-div-icon',
+                html: `<div style="background-color:${markerColor}; width: 25px; height: 25px; border-radius: 50%; border: 2px solid white;"></div>`
+            });
+
+            var marker = L.marker([{{ item[2] }}, {{ item[3] }}], { icon: icon })
+                .bindPopup(`
+                    <div class="popup-content-wrapper" style="background-image: url('{{ url_for('static', filename='images/' + item[5]) }}');">
+                        <div class="popup-title">{{ item[0] }}</div>
+                        <div>Status: <span style="color:${markerColor};">${'{{ item[1] }}'}</span></div>
+                        <div>Contact: {{ item[4] }}</div>
+                        {% if item[5] %}
+                            <img src="{{ url_for('static', filename=item[5]) }}" class="popup-img" alt="{{ item[0] }}">
+                        {% else %}
+                            <div class="fallback">No image available</div>
+                        {% endif %}
+                    </div>
+                `);
+
+            markers.addLayer(marker);
+        {% endfor %}
+
+        map.addLayer(markers);
+
+        var bounds = [];
+        {% for item in lost_items %}
+            bounds.push([{{ item[2] }}, {{ item[3] }}]);
+        {% endfor %}
+        bounds.push([12.923631, 77.500312]);
+        map.fitBounds(bounds);
+    </script>
+</body>
+</html>

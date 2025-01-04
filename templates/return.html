@@ -6,6 +6,7 @@
     <title>Report Lost or Found Item</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         body {
             background: linear-gradient(120deg, #74ebd5, #9face6);
@@ -78,19 +79,17 @@
             border-color: #0056b3;
         }
 
-        .tooltip-inner {
-            background-color: #0056b3;
-            color: white;
+        #map {
+            height: 300px;
+            width: 100%;
+            margin-bottom: 20px;
+            border-radius: 10px;
         }
 
-        .custom-tooltip {
-            position: relative;
-            cursor: pointer;
-        }
-
-        .date-group input[type="text"] {
-            cursor: not-allowed;
-            background-color: #f9f9f9;
+        .coordinates {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 10px;
         }
 
         .footer {
@@ -107,12 +106,10 @@
             <div class="col-lg-6 col-md-8">
                 <div class="form-container">
                     <h2 class="form-title">Report Lost or Found Item</h2>
-                    <form action="/report" method="POST" enctype="multipart/form-data">
+                    <form action="{{ url_for('report') }}" method="POST" enctype="multipart/form-data">
                         <!-- Priority -->
                         <div class="form-group">
-                            <label for="priority">Priority 
-                                <i class="fas fa-info-circle custom-tooltip" data-bs-toggle="tooltip" data-bs-placement="top" title="Set urgency level for the report"></i>
-                            </label>
+                            <label for="priority">Priority</label>
                             <select id="priority" name="priority" class="form-select" required>
                                 <option value="1">Low</option>
                                 <option value="2">Medium</option>
@@ -168,18 +165,29 @@
                             </div>
                         </div>
 
-                        
                         <!-- Date/Time -->
                         <div class="form-group">
                             <label for="date">Date/Time</label>
                             <input type="datetime-local" id="date" name="date" class="form-control date-input" required>
                         </div>
 
-
                         <!-- Location -->
                         <div class="form-group">
                             <label for="location">Location</label>
                             <input type="text" id="location" name="location" class="form-control" placeholder="Enter the location" required>
+                            <!-- Hidden lat/lng fields -->
+                            <input type="hidden" id="latitude" name="latitude" value="">
+                            <input type="hidden" id="longitude" name="longitude" value="">
+                        </div>
+
+                        <!-- Map -->
+                        <div class="form-group">
+                            <div id="map"></div>
+                        </div>
+
+                        <!-- Display Latitude and Longitude -->
+                        <div class="coordinates">
+                            Latitude: <span id="display-lat">-</span>, Longitude: <span id="display-lng">-</span>
                         </div>
 
                         <!-- Contact Info -->
@@ -197,27 +205,42 @@
             </div>
         </div>
         <div class="footer">
-            &copy; 2024 Lost & Found. Made By OnlyNandan.
+            &copy; 2025 Lost & Found. Made By OnlyNandan.
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        // Initialize Bootstrap Tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+        // Initialize Leaflet Map
+        const map = L.map('map').setView([12.923631, 77.500312], 20); // Default view
 
-        // Format datetime-local input to dd/mm/yyyy
-        const dateInput = document.getElementById("date-input");
-        const dateDisplay = document.getElementById("date-display");
-        
-        dateInput.addEventListener("change", function () {
-            const date = new Date(this.value);
-            const formattedDate = `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-            dateDisplay.value = formattedDate;
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        let marker;
+
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+
+            // Remove existing marker if any
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            // Add a new marker at the clicked position
+            marker = L.marker([lat, lng]).addTo(map);
+
+            // Update hidden latitude and longitude fields
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+
+            // Display latitude and longitude under the map
+            document.getElementById('display-lat').innerText = lat.toFixed(6);
+            document.getElementById('display-lng').innerText = lng.toFixed(6);
         });
     </script>
 </body>
