@@ -52,3 +52,13 @@ We welcome contributions to improve the project! If you want to add new features
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Star History
+
+<a href="https://star-history.com/#OnlyNandan/LostNFound&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=OnlyNandan/LostNFound&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=OnlyNandan/LostNFound&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=OnlyNandan/LostNFound&type=Date" />
+ </picture>
+</a>
